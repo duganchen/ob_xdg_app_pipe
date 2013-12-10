@@ -6,10 +6,28 @@ import glob
 from lxml import etree
 import os
 import gtk
+from xdg import BaseDirectory
 from xdg.DesktopEntry import DesktopEntry
 
 
 def main():
+    cache_directory = BaseDirectory.save_cache_path('ob_xdg_apps')
+    xml_file = os.path.join(cache_directory, 'menu.xml')
+
+    appdirs = (os.path.join(datadir, 'applications') for datadir in
+               BaseDirectory.xdg_data_dirs)
+    updated = False
+    for appdir in appdirs:
+        if os.path.isdir(appdir):
+            if os.stat(appdir).st_ctime > os.stat(xml_file).st_ctime:
+                updated = True
+                break
+
+    if not updated:
+        with open(xml_file) as f:
+            print f.read()
+        return
+
     icon_theme = gtk.icon_theme_get_default()
 
     menu = etree.Element('openbox_pipe_menu')
@@ -51,7 +69,10 @@ def main():
                 enabled = etree.SubElement(startup_notify, 'enabled')
                 enabled.text = 'yes'
 
-    print etree.tostring(menu, pretty_print=True)
+    xml = etree.tostring(menu, pretty_print=True)
+    with open(xml_file, 'w') as f:
+        f.write(xml)
+    #print xml
 
 
 class MenuAccumulator(object):
