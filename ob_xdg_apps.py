@@ -72,7 +72,7 @@ def main():
     xml = etree.tostring(menu, pretty_print=True)
     with open(xml_file, 'w') as f:
         f.write(xml)
-    #print xml
+    print xml
 
 
 class MenuAccumulator(object):
