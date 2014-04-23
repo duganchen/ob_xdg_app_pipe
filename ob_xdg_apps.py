@@ -114,14 +114,11 @@ MenuStructure = collections.namedtuple('MenuStructure',
 
 def get_desktop_entries():
 
-    patterns = (
-        os.path.join(os.sep, 'usr', 'share', 'applications', '*.desktop'),
-        os.path.join(os.path.expanduser('~'),
-                     '.local', 'share', 'applications', '*.desktop'))
+    pattern = os.path.join(os.sep, 'usr', 'share', 'applications',
+                           '*.desktop')
 
-    for pattern in patterns:
-        for desktop_entry in glob.iglob(pattern):
-            yield DesktopEntry(desktop_entry)
+    for desktop_entry in glob.iglob(pattern):
+        yield DesktopEntry(desktop_entry)
 
 if __name__ == '__main__':
     main()
