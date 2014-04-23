@@ -50,7 +50,7 @@ def main():
             comment = desktop_entry.getComment()
             if len(comment) > 0:
                 name = '{}: {}'.format(name, comment)
-            item_attributes = {'label': name}
+            item_attributes = {'label': name.decode('utf-8')}
             entry_icon = desktop_entry.getIcon()
             if os.path.isfile(entry_icon):
                 item_attributes['icon'] = entry_icon
