@@ -47,9 +47,6 @@ def main():
 
         for desktop_entry in menu_accumulator.structure[category]:
             name = desktop_entry.getName()
-            comment = desktop_entry.getComment()
-            if len(comment) > 0:
-                name = '{}: {}'.format(name, comment)
             item_attributes = {'label': name.decode('utf-8')}
             entry_icon = desktop_entry.getIcon()
             if os.path.isfile(entry_icon):
@@ -62,9 +59,7 @@ def main():
             item = etree.SubElement(submenu, 'item', item_attributes)
             action = etree.SubElement(item, 'action', {'name': 'Execute'})
             command = etree.SubElement(action, 'command')
-            exec_ = desktop_entry.getExec()
-            exec_ = exec_.split()[0]
-            command.text = exec_
+            command.text = desktop_entry.getExec()
 
             if desktop_entry.getStartupNotify():
                 startup_notify = etree.SubElement(action, 'startupnotify')
@@ -87,10 +82,6 @@ class MenuAccumulator(object):
             (category, []) for category in main_categories)
 
     def add_entry(self, desktop_entry):
-        if len(desktop_entry.getOnlyShowIn()) > 0:
-            return
-        if desktop_entry.getTerminal():
-            return
         for category in desktop_entry.getCategories():
             if category in self.__categories:
                 self.__categories[category].append(desktop_entry)
@@ -114,11 +105,21 @@ MenuStructure = collections.namedtuple('MenuStructure',
 
 def get_desktop_entries():
 
-    pattern = os.path.join(os.sep, 'usr', 'share', 'applications',
-                           '*.desktop')
+    starts = ((os.path.expanduser('~'), 'local'), (os.sep, 'usr'))
+    end = ('share', 'applications', '*.desktop')
 
-    for desktop_entry in glob.iglob(pattern):
-        yield DesktopEntry(desktop_entry)
+    for start in starts:
+        pattern = os.path.join(*(start + end))
+
+        for desktop_entry in glob.iglob(pattern):
+            entry = DesktopEntry(desktop_entry)
+            if entry.getNoDisplay():
+                continue
+            if entry.getOnlyShowIn():
+                continue
+            if entry.getTerminal():
+                continue
+            yield entry
 
 if __name__ == '__main__':
     main()
